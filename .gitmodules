@@ -1,3 +1,6 @@
 [submodule "d3-tutorial"]
 	path = d3-tutorial
 	url = git@github.com:pawelbx/d3-tutorial.git
+[submodule "coffeeScriptNotes"]
+	path = coffeeScriptNotes
+	url = https://github.com/pawelbx/coffeeScriptNotes.git
