@@ -4,3 +4,6 @@
 [submodule "coffeeScriptNotes"]
 	path = coffeeScriptNotes
 	url = https://github.com/pawelbx/coffeeScriptNotes.git
+[submodule "proGitOutline"]
+	path = proGitOutline
+	url = git@github.com:pawelbx/proGitOutline.git
