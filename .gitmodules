@@ -1,0 +1,3 @@
+[submodule "d3-tutorial"]
+	path = d3-tutorial
+	url = git@github.com:pawelbx/d3-tutorial.git
