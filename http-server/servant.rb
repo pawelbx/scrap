@@ -16,40 +16,34 @@ begin
     return status
   end
 
-  server_msg = <<-MSG 
+  payload = 'Hello World!'
+  server_header = <<-HEADER
 HTTP/1.1 200 OK
+Keep-Alive: timeout=600
+Connection: Keep-Alive
 Content-Type: text/plain
+Content-Length: #{payload.bytesize}
 Status: 200
 Date: #{Time.now}
 
-Hello World!
+HEADER
 
-<html>
-<head>
-  <title>An Example Page</title>
-</head>
-<body>
-  Hello World, this is a very simple HTML document.
-</body>
-</html>
-MSG
-
+  full_msg = server_header + payload
   loop do
-    puts "Listening..."
-    client_socket, client_addrinfo = socket.accept
-    puts "Accepted client connection: #{client_socket.inspect}"
-    puts "Client information: #{client_addrinfo.inspect}"
+    puts 'Listening...'
+    Thread.new(socket.accept) do |client_socket, client_addrinfo|
+      puts "Accepted client connection: #{client_socket.inspect}"
+      puts "Client information: #{client_addrinfo.inspect}"
 
-    client_msg = client_socket.recv(4096)
+      client_msg = client_socket.recv(4096)
 
-    puts "Received from client: #{client_msg}"
+      puts "Received from client: #{client_msg}"
 
-    client_socket.send(server_msg, 0)
-    client_socket.flush
-    puts "Message sent"
-    #client_socket.close
+      client_socket.send(full_msg, 0)
+      client_socket.flush
+      puts 'Message sent'
+    end
   end
-
 rescue StandardError => e
   puts e
 ensure
