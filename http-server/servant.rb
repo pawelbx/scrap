@@ -1,7 +1,8 @@
 #!/usr/bin/ruby
 require 'socket'
 require 'optparse'
-require 'http_request'
+require 'byebug'
+require_relative 'http_request'
 
 options = {}
 OptionParser.new do |opts|
@@ -20,7 +21,18 @@ def socket_listen(port: 3000)
   socket
 end
 
-def http_server_listen
+def response(payload)
+  server_header = <<-HEADER
+HTTP/1.1 200 OK
+Keep-Alive: timeout=600
+Connection: Keep-Alive
+Content-Type: text/plain
+Content-Length: #{payload.bytesize}
+Status: 200
+Date: #{Time.now}
+
+#{payload}
+HEADER
 end
 
 begin
@@ -34,25 +46,31 @@ begin
       puts "Received from client: #{client_msg}"
 
       http_request = HttpRequest.new(client_msg)
+
+      puts "HTTP Request: #{http_request}"
+
+      root_path = File.expand_path(options[:dir])
+      request_path = File.expand_path(options[:dir] + http_request.url)
+      dir_list = request_path.split('/')
+      valid_dir = dir_list[0..request_path.size - 1] == root_path.split('/')
+      if !valid_dir
+        return 401 #return forbidden error
+      end
+
+      request_path += '/index.html' if request_path == root_path
+
+      if File.file?(request_path)
+        payload = File.open(request_path).read
+        full_msg = response(payload)
+      else
+        return 404
+      end
+
       client_socket.send(full_msg, 0)
-      client_socket.flush
       puts 'Message sent'
     end
   end
 
-  payload = 'Hello World!'
-  server_header = <<-HEADER
-HTTP/1.1 200 OK
-Keep-Alive: timeout=600
-Connection: Keep-Alive
-Content-Type: text/plain
-Content-Length: #{payload.bytesize}
-Status: 200
-Date: #{Time.now}
-
-HEADER
-
-  full_msg = server_header + payload
 rescue InvalidHttpRequestError => e
   puts e
 rescue StandardError => e
