@@ -48,13 +48,13 @@ begin
       http_request = HttpRequest.new(client_msg)
 
       puts "HTTP Request: #{http_request}"
-
       root_path = File.expand_path(options[:dir])
       request_path = File.expand_path(options[:dir] + http_request.url)
-      dir_list = request_path.split('/')
-      valid_dir = dir_list[0..request_path.size - 1] == root_path.split('/')
+      request_path_dir_list = request_path.split('/')
+      root_path_dir_list = root_path.split('/')
+      valid_dir = request_path_dir_list[0..root_path_dir_list.size - 1] == root_path_dir_list
       if !valid_dir
-        return 401 #return forbidden error
+        return 401
       end
 
       request_path += '/index.html' if request_path == root_path
