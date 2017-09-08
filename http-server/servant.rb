@@ -21,12 +21,44 @@ def socket_listen(port: 3000)
   socket
 end
 
-def response(payload)
+def response(status, payload = nil, payload_type = 'text/html')
+  if status == 404
+    status_msg = 'Not Found'
+    payload = <<-MSG404
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title> 404 </title>
+  </head>
+  <body>
+    <h1> Not Found. </h1>
+  </body>
+</html>
+MSG404
+  elsif status = 500
+    status_msg = 'Internal Server Error'
+    payload = <<-MSG500
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title> 500 </title>
+  </head>
+  <body>
+    <h1> Internal Error. </h1>
+  </body>
+</html>
+MSG500
+  else
+    status_msg = 'OK'
+  end
+
   server_header = <<-HEADER
-HTTP/1.1 200 OK
+HTTP/1.1 #{status} #{status_msg}
 Keep-Alive: timeout=600
 Connection: Keep-Alive
-Content-Type: text/plain
+Content-Type: #{payload_type}
 Content-Length: #{payload.bytesize}
 Status: 200
 Date: #{Time.now}
@@ -53,6 +85,7 @@ begin
       request_path_dir_list = request_path.split('/')
       root_path_dir_list = root_path.split('/')
       valid_dir = request_path_dir_list[0..root_path_dir_list.size - 1] == root_path_dir_list
+
       if !valid_dir
         return 401
       end
